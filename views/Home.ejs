@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="/css/login.css" />
+    <!-- Font Awesome -->
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+      rel="stylesheet"
+    />
+    <!-- Google Fonts -->
+    <link
+      href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap"
+      rel="stylesheet"
+    />
+    <!-- MDB -->
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/8.1.0/mdb.min.css"
+      rel="stylesheet"
+    />
+    <title>HomePage</title>
+  </head>
+  <body>
+    <div class="vh-100 gradient-custom">
+      <section class="gradient-custom" style="height: 100%">
+        <div class="container py-5 h-100">
+          <div
+            class="row d-flex justify-content-center align-items-center h-100"
+          >
+            <div class="col-12 col-md-8 col-lg-6 col-xl-9">
+              <div class="card bg-dark text-white" style="border-radius: 1rem">
+                <div class="card-body p-5 text-center">
+                  <div class="mb-md-5 mt-md-4 pb-5">
+                    <h2 class="fw-bold mb-2 text-uppercase">HomePage</h2>
+                    <button type="button" class="btn btn-danger mb-2 ms-2">
+                      <a href="/logout" class="text-light">Logout</a>
+                    </button>
+
+                    <div class="alert-container">
+                      <div
+                        id="successAlert"
+                        class="alert alert-success"
+                        style="display: none"
+                      ></div>
+                    </div>
+
+                    <% if (messages.success) { %>
+                    <div class="alert alert-success" id="successAlertt">
+                      <%= messages.success %>
+                    </div>
+                    <% } %>
+
+                    <button
+                      id="generateQrButton"
+                      class="btn btn-outline-light btn-lg px-5"
+                      type="button"
+                    >
+                      Generate QR Code
+                    </button>
+
+                    <p id="generatedNumber" class="text-white-50 mt-2 mb-2"></p>
+
+                    <img
+                      id="qrImage"
+                      style="
+                        display: none;
+                        width: 200px;
+                        height: 200px;
+                        margin-left: 337px;
+                      "
+                      alt="QR Code"
+                    />
+                  </div>
+                  <table class="table table-dark">
+                    <thead>
+                      <tr>
+                        <th scope="col">Id</th>
+                        <th scope="col">Voucher Number</th>
+                        <th scope="col">Generate and Download PDF</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <% if (vouchers.length === 0) { %>
+                      <tr>
+                        <td colspan="3" class="text-center">
+                          No vouchers available
+                        </td>
+                      </tr>
+                      <% } else { %> <% vouchers.forEach((voucher, index) => {
+                      %>
+                      <tr>
+                        <th scope="row"><%= index + 1 %></th>
+                        <td><%= voucher.number %></td>
+                        <td>
+                          <button
+                            class="btn btn-outline-light btn-lg px-5 btn-customize-pdf"
+                            type="button"
+                            data-voucher-id="<%= voucher.id %>"
+                          >
+                            Download
+                          </button>
+                        </td>
+                      </tr>
+                      <% }); %> <% } %>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </body>
+  <script
+    type="text/javascript"
+    src="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/8.1.0/mdb.umd.min.js"
+  ></script>
+  <script>
+    setTimeout(() => {
+      const alertElement = document.getElementById("successAlertt");
+      if (alertElement) {
+        alertElement.style.display = "none";
+      }
+    }, 2000);
+
+    document
+      .getElementById("generateQrButton")
+      .addEventListener("click", async () => {
+        try {
+          const response = await fetch("/generate-qr", {
+            method: "POST",
+          });
+
+          if (response.ok) {
+            const { randomNumber, qrCode } = await response.json();
+            const generatedNumberElement =
+              document.getElementById("generatedNumber");
+            const qrImageElement = document.getElementById("qrImage");
+            const successAlert = document.getElementById("successAlert");
+
+            successAlert.textContent = `QR Code Generated! Random Number: ${randomNumber}`;
+            successAlert.style.display = "block";
+
+            generatedNumberElement.textContent = `Generated Number: ${randomNumber}`;
+            qrImageElement.src = qrCode;
+            qrImageElement.style.display = "block";
+
+            setTimeout(() => {
+              window.location.reload();
+            }, 5000);
+
+            setTimeout(() => {
+              successAlert.style.display = "none";
+            }, 5000);
+          } else {
+            console.error("Failed to generate QR code:", response.statusText);
+          }
+        } catch (error) {
+          console.error("Error generating QR code:", error);
+        }
+      });
+
+    document.querySelectorAll(".btn-customize-pdf").forEach((button) => {
+      button.addEventListener("click", (event) => {
+        const voucherId = event.target.getAttribute("data-voucher-id");
+
+        window.location.href = `/settings?voucherId=${voucherId}`;
+      });
+    });
+  </script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+</html>
