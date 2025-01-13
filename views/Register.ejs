@@ -34,13 +34,17 @@
           <div class="col-12 col-md-8 col-lg-6 col-xl-5">
             <div class="card bg-dark text-white" style="border-radius: 1rem">
               <div class="card-body p-5 text-center">
-               
                 <div class="mb-md-5 mt-md-4 pb-5">
                   <h2 class="fw-bold mb-2 text-uppercase">Register</h2>
                   <p class="text-white-50 mb-5">
                     Please enter your details for registration!
                   </p>
-                  <form action="/register" method="POST" >
+                  <form
+                    action="/register"
+                    method="POST"
+                    onsubmit="return validateForm(event)"
+                  >
+                    <span id="nameError" class="form-text"></span>
                     <div
                       data-mdb-input-init
                       class="form-outline form-white mb-4"
@@ -51,9 +55,11 @@
                         id="name"
                         class="form-control form-control-lg"
                         required
+                        oninput="validateName()"
                       />
                       <label class="form-label" for="name">Name</label>
                     </div>
+                    <span id="emailError" class="form-text"></span>
                     <div
                       data-mdb-input-init
                       class="form-outline form-white mb-4"
@@ -64,9 +70,11 @@
                         id="email"
                         class="form-control form-control-lg"
                         required
+                        oninput="validateEmail()"
                       />
                       <label class="form-label" for="email">Email</label>
                     </div>
+                    <span id="passwordError" class="form-text"></span>
                     <div
                       data-mdb-input-init
                       class="form-outline form-white mb-4"
@@ -77,17 +85,16 @@
                         id="password"
                         class="form-control form-control-lg"
                         required
+                        oninput="validatePassword()"
                       />
                       <label class="form-label" for="password">Password</label>
-
-                      <% if (messages.alert) { %>
-                        <div class="alert alert-danger" id="successAlert">
-                          <%= messages.alert %> 
-                        </div>
-                      <% } %>
                     </div>
+                    <% if (messages.alert) { %>
+                    <div class="alert alert-danger" id="successAlert">
+                      <%= messages.alert %>
+                    </div>
+                    <% } %>
                     <button
-                      
                       class="btn btn-outline-light btn-lg px-5"
                       type="submit"
                     >
@@ -108,6 +115,66 @@
       </div>
     </section>
   </body>
+  <script>
+    function validateForm(event) {
+      // Validate each field
+      const nameValid = validateName(true);
+      const emailValid = validateEmail(true);
+      const passwordValid = validatePassword(true);
+
+      // If any validation fails, prevent form submission
+      if (!nameValid || !emailValid || !passwordValid) {
+        event.preventDefault();
+        return false;
+      }
+
+      return true;
+    }
+
+    function validateName(returnValidation = false) {
+      const name = document.getElementById("name");
+      const nameError = document.getElementById("nameError");
+      const regex = /^(?!\s)[A-Za-z\s]{3,}$/;
+      if (!regex.test(name.value)) {
+        nameError.textContent = "Invalid";
+        nameError.style.color = "red";
+        return false;
+      } else {
+        nameError.textContent = "Valid";
+        nameError.style.color = "green";
+        return true;
+      }
+    }
+
+    function validateEmail(returnValidation = false) {
+      const email = document.getElementById("email");
+      const emailError = document.getElementById("emailError");
+      const regex = /^[a-zA-Z]{3,}@[a-zA-Z]+\.[a-zA-Z]+$/;
+      if (!regex.test(email.value)) {
+        emailError.textContent = "Invalid";
+        emailError.style.color = "red";
+        return false;
+      } else {
+        emailError.textContent = "Valid";
+        emailError.style.color = "green";
+        return true;
+      }
+    }
+
+    function validatePassword(returnValidation = false) {
+      const password = document.getElementById("password");
+      const passwordError = document.getElementById("passwordError");
+      if (password.value.length < 6) {
+        passwordError.textContent = "Password must be at least 6 characters.";
+        passwordError.style.color = "red";
+        return false;
+      } else {
+        passwordError.textContent = "Valid";
+        passwordError.style.color = "green";
+        return true;
+      }
+    }
+  </script>
   <script
     type="text/javascript"
     src="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/8.1.0/mdb.umd.min.js"
