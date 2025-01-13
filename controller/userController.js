@@ -113,7 +113,7 @@ const usercontroller = {
     try {
       req.session.destroy((err) => {
         if (err) {
-          console.error("Error destroyin  g session:", err);
+          console.error("Error destroying session:", err);
           req.flash("alert", "Something went wrong. Please try again.");
           return res.redirect("/");
         }
