@@ -5,7 +5,10 @@ import { sql, config } from "../config/db.js";
 const usercontroller = {
   getLogin: (req, res, next) => {
     try {
-      res.render("Login");
+      if (req.session.user) {
+        return res.redirect("/");
+      }
+      res.render("login");
     } catch (error) {
       next(error);
     }
@@ -35,7 +38,8 @@ const usercontroller = {
       if (isMatch) {
         req.session.user = { id: user.id, email: user.email, name: user.name };
         req.flash("success", "Login successfully");
-        res.redirect("/home");
+        res.redirect("/");
+        console.log('after',req.session.user)
       } else {
         req.flash("alert", "Incorrect email or password");
         res.redirect("/login");
@@ -47,6 +51,9 @@ const usercontroller = {
 
   getRegister: (req, res, next) => {
     try {
+      if (req.session.user) {
+        res.redirect("/");
+      }
       res.render("Register");
     } catch (error) {
       next(error);
@@ -77,7 +84,7 @@ const usercontroller = {
       });
       req.session.user = { id: user.id, email: user.email, name: user.name };
       req.flash("success", "Registered successfully");
-      res.redirect("/home");
+      res.redirect("/");
     } catch (error) {
       next(error);
     }
@@ -89,10 +96,30 @@ const usercontroller = {
       const query = `
         SELECT * FROM Vouchers
         ORDER BY gendate DESC;
-      `
+      `;
       const result = await pool.query(query);
-      res.render('home', {
-        vouchers: result.recordset
+      res.render("home", {
+        vouchers: result.recordset,
+      });
+    } catch (error) {
+      next(error);
+    }
+  },
+
+  notFound: (req, res) => {
+    res.render("404Error");
+  },
+
+  logout: (req, res, next) => {
+    try {
+      req.session.destroy((err) => {
+        if (err) {
+          console.error("Error destroyin  g session:", err);
+          req.flash("alert", "Something went wrong. Please try again.");
+          return res.redirect("/");
+        }
+        res.clearCookie("connect.sid");
+        res.redirect("/login");
       });
     } catch (error) {
       next(error);

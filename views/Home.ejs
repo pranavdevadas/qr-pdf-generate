@@ -169,6 +169,12 @@
         window.location.href = `/settings?voucherId=${voucherId}`;
       });
     });
+
+    history.pushState(null, null, location.href);
+
+    window.addEventListener("popstate", () => {
+      history.pushState(null, null, location.href);
+    });
   </script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </html>
