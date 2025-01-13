@@ -39,7 +39,6 @@ const usercontroller = {
         req.session.user = { id: user.id, email: user.email, name: user.name };
         req.flash("success", "Login successfully");
         res.redirect("/");
-        console.log('after',req.session.user)
       } else {
         req.flash("alert", "Incorrect email or password");
         res.redirect("/login");
